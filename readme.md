@@ -10,3 +10,15 @@ installed._
 ```
 GO111MODULE=off go get -u github.com/aggr/aggr-cli
 ```
+
+## Usage
+
+```
+aggr-cli @username
+```
+
+## Development
+
+```
+go run . @username
+```
