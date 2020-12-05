@@ -145,6 +145,10 @@ func newApp(feed *gofeed.Feed) *tview.Application {
 			if r == 'G' || k == tcell.KeyEnd {
 				return tcell.NewEventKey(tcell.KeyEnd, 0, tcell.ModNone)
 			}
+
+			if r == 'q' {
+				app.Stop()
+			}
 		}
 
 		return nil
