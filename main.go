@@ -9,6 +9,7 @@ import (
 	"time"
 
 	aggrstate "github.com/aggr/aggr-cli/state"
+	"github.com/gdamore/tcell/v2"
 	"github.com/mmcdole/gofeed"
 	"github.com/pkg/browser"
 	"github.com/rivo/tview"
@@ -96,23 +97,57 @@ func newApp(feed *gofeed.Feed) *tview.Application {
 	list := tview.NewList()
 
 	for i, item := range feed.Items {
-		mainText := item.Title
+		mainText := fmt.Sprintf("%02d. %s", i+1, item.Title)
 
-		secondaryText := "by " + item.Author.Name
+		secondaryText := "    by " + item.Author.Name
 		if pp := item.PublishedParsed; pp != nil {
 			secondaryText += " | " + timeago.English.Format(*pp)
 		}
 
-		shortcut := rune(int('a') + i)
+		var shortcut rune
 
 		list.AddItem(mainText, secondaryText, shortcut, nil)
 	}
 
-	list.SetChangedFunc(func(i int, _ string, _ string, _ rune) {
+	list.SetSelectedFunc(func(i int, _ string, _ string, _ rune) {
 		if err := browser.OpenURL(feed.Items[i].Link); err != nil {
 			log.Panic().Err(err).Msg("Failed to open the link in a browser")
 		}
 		app.Stop()
+	})
+
+	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if list.GetItemCount() > 0 {
+			k, r := event.Key(), event.Rune()
+
+			if r == 'o' || k == tcell.KeyEnter || k == tcell.KeyCtrlM {
+				return tcell.NewEventKey(tcell.KeyEnter, 0, tcell.ModNone)
+			}
+
+			if r == 'j' || k == tcell.KeyCtrlN || k == tcell.KeyDown {
+				if list.GetCurrentItem() == list.GetItemCount()-1 {
+					return nil
+				}
+				return tcell.NewEventKey(tcell.KeyDown, 0, tcell.ModNone)
+			}
+
+			if r == 'k' || k == tcell.KeyCtrlP || k == tcell.KeyUp {
+				if list.GetCurrentItem() == 0 {
+					return nil
+				}
+				return tcell.NewEventKey(tcell.KeyUp, 0, tcell.ModNone)
+			}
+
+			if r == 'g' || k == tcell.KeyHome {
+				return tcell.NewEventKey(tcell.KeyHome, 0, tcell.ModNone)
+			}
+
+			if r == 'G' || k == tcell.KeyEnd {
+				return tcell.NewEventKey(tcell.KeyEnd, 0, tcell.ModNone)
+			}
+		}
+
+		return nil
 	})
 
 	return app.SetRoot(list, true).EnableMouse(true)
