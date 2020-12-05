@@ -46,7 +46,7 @@ func main() {
 
 	app := newApp(state.Feed)
 	if err := app.Run(); err != nil {
-		log.Panic().Err(err).Msg("Failed to run the TUI")
+		log.Err(err).Msg("Failed to run the TUI")
 	}
 }
 
@@ -111,7 +111,7 @@ func newApp(feed *gofeed.Feed) *tview.Application {
 
 	list.SetSelectedFunc(func(i int, _ string, _ string, _ rune) {
 		if err := browser.OpenURL(feed.Items[i].Link); err != nil {
-			log.Panic().Err(err).Msg("Failed to open the link in a browser")
+			log.Err(err).Msg("Failed to open the link in a browser")
 		}
 		app.Stop()
 	})
