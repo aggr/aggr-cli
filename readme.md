@@ -20,5 +20,6 @@ aggr-cli @username
 ## Development
 
 ```
-go run . @username
+go run . @username # run the local version
+go install .       # install the local version on your system
 ```
