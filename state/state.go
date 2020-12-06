@@ -26,10 +26,11 @@ func NewState(username string) *State {
 }
 
 func LoadState(username string) (*State, error) {
-	f, err := os.OpenFile(getPathForUsername(username), os.O_RDONLY, 0755)
+	f, err := os.Open(getPathForUsername(username))
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 
 	var s State
 	if err := json.NewDecoder(f).Decode(&s); err != nil {
@@ -45,6 +46,7 @@ func (s *State) Save() error {
 		return err
 	}
 	defer f.Close()
+
 	return json.NewEncoder(f).Encode(s)
 }
 
